@@ -1,0 +1,113 @@
+From 054348e583a620667b12941870efdc5258a8fa3b Mon Sep 17 00:00:00 2001
+From: "Miss Islington (bot)"
+ <31488909+miss-islington@users.noreply.github.com>
+Date: Wed, 13 May 2026 05:08:39 +0200
+Subject: [PATCH] [3.14] gh-149574: Document that is_typeddict, is_protocol,
+ is_dataclass, isclass return False for generic aliases (GH-149604) (#149751)
+
+gh-149574: Document that is_typeddict, is_protocol, is_dataclass, isclass return False for generic aliases (GH-149604)
+(cherry picked from commit a4e51c8dac9fdd49ae26ff8c6cd3c808fd8ba15e)
+
+Co-authored-by: Jelle Zijlstra <jelle.zijlstra@gmail.com>
+---
+ Doc/library/dataclasses.rst |  3 ++-
+ Doc/library/inspect.rst     |  3 +++
+ Doc/library/stdtypes.rst    |  3 ++-
+ Doc/library/typing.rst      | 30 +++++++++++++++++++++++++++---
+ 4 files changed, 34 insertions(+), 5 deletions(-)
+
+diff --git a/Doc/library/dataclasses.rst b/Doc/library/dataclasses.rst
+index cff36e258224d3..915c031e0976fd 100644
+--- a/Doc/library/dataclasses.rst
++++ b/Doc/library/dataclasses.rst
+@@ -497,7 +497,8 @@ Module contents
+ .. function:: is_dataclass(obj)
+ 
+    Return ``True`` if its parameter is a dataclass (including subclasses of a
+-   dataclass) or an instance of one, otherwise return ``False``.
++   dataclass, but not including :ref:`generic aliases <types-genericalias>`)
++   or an instance of one, otherwise return ``False``.
+ 
+    If you need to know if a class is an instance of a dataclass (and
+    not a dataclass itself), then add a further check for ``not
+diff --git a/Doc/library/inspect.rst b/Doc/library/inspect.rst
+index 5e3c5c1f155a2a..1e0ad1a010e53a 100644
+--- a/Doc/library/inspect.rst
++++ b/Doc/library/inspect.rst
+@@ -399,6 +399,9 @@ attributes (see :ref:`import-mod-attrs` for module attributes):
+    Return ``True`` if the object is a class, whether built-in or created in Python
+    code.
+ 
++   This function returns ``False`` for :ref:`generic aliases <types-genericalias>` of classes,
++   such as ``list[int]``.
++
+ 
+ .. function:: ismethod(object)
+ 
+diff --git a/Doc/library/stdtypes.rst b/Doc/library/stdtypes.rst
+index 37b940a07e6cc0..ec18cd75259147 100644
+--- a/Doc/library/stdtypes.rst
++++ b/Doc/library/stdtypes.rst
+@@ -5783,7 +5783,8 @@ type and the :class:`bytes` data type:
+ 
+ ``GenericAlias`` objects are instances of the class
+ :class:`types.GenericAlias`, which can also be used to create ``GenericAlias``
+-objects directly.
++objects directly. Specializations of user-defined :ref:`generic classes <generic-classes>`
++may not be instances of :class:`types.GenericAlias`, but they provide similar functionality.
+ 
+ .. describe:: T[X, Y, ...]
+ 
+diff --git a/Doc/library/typing.rst b/Doc/library/typing.rst
+index 7a76bc5545724b..b97dcc91b61207 100644
+--- a/Doc/library/typing.rst
++++ b/Doc/library/typing.rst
+@@ -3480,14 +3480,27 @@ Introspection helpers
+ 
+    Determine if a type is a :class:`Protocol`.
+ 
+-   For example::
++   For example:
++
++   .. testcode::
+ 
+       class P(Protocol):
+           def a(self) -> str: ...
+           b: int
+ 
+-      is_protocol(P)    # => True
+-      is_protocol(int)  # => False
++      assert is_protocol(P)
++      assert not is_protocol(int)
++
++   This function only returns true for ``Protocol`` classes, not for
++   :ref:`generic aliases <types-genericalias>` of them:
++
++   .. testcode::
++
++      class GenericP[T](Protocol):
++          def a(self) -> T: ...
++          b: int
++
++      assert not is_protocol(GenericP[int])
+ 
+    .. versionadded:: 3.13
+ 
+@@ -3510,6 +3523,17 @@ Introspection helpers
+       # not a typed dict itself
+       assert not is_typeddict(TypedDict)
+ 
++   This function only returns true for ``TypedDict`` classes, not for
++   :ref:`generic aliases <types-genericalias>` of them:
++
++   .. testcode::
++
++      class GenericFilm[T](TypedDict):
++          title: str
++          year: T
++
++      assert not is_typeddict(GenericFilm[int])
++
+    .. versionadded:: 3.10
+ 
+ .. class:: ForwardRef
