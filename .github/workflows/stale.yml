@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   stale:
-    if: github.repository_owner == 'python'
+    if: github.repository_owner == 'zrsx' && github.repository == 'zrsx/ver' && github.event.repository.fork == false
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
