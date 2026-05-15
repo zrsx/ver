@@ -450,7 +450,8 @@ int _mi_prim_alloc_huge_os_pages(void* hint_addr, size_t size, int numa_node, bo
     long err = (long)mi_prim_mbind(*addr, size, MPOL_PREFERRED, &numa_mask, 8*MI_INTPTR_SIZE, 0);
     if (err != 0) {
       err = (long)errno;
-      _mi_warning_message("failed to bind huge (1GiB) pages to numa node %d (error: %ld (0x%lx))\n", numa_node, (long)err, (unsigned long)err);
+      const unsigned long uerr = (unsigned long)err;
+      _mi_warning_message("failed to bind huge (1GiB) pages to numa node %d (error: %ld (0x%lx))\n", numa_node, err, uerr);
     }
   }
   return (*addr != NULL ? 0 : errno);
