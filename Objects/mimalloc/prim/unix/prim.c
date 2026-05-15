@@ -447,10 +447,10 @@ int _mi_prim_alloc_huge_os_pages(void* hint_addr, size_t size, int numa_node, bo
     // TODO: does `mbind` work correctly for huge OS pages? should we
     // use `set_mempolicy` before calling mmap instead?
     // see: <https://lkml.org/lkml/2017/2/9/875>
-    long err = mi_prim_mbind(*addr, size, MPOL_PREFERRED, &numa_mask, 8*MI_INTPTR_SIZE, 0);
+    long err = (long)mi_prim_mbind(*addr, size, MPOL_PREFERRED, &numa_mask, 8*MI_INTPTR_SIZE, 0);
     if (err != 0) {
-      err = errno;
-      _mi_warning_message("failed to bind huge (1GiB) pages to numa node %d (error: %ld (0x%lx))\n", numa_node, err, (unsigned long)err);
+      err = (long)errno;
+      _mi_warning_message("failed to bind huge (1GiB) pages to numa node %d (error: %ld (0x%lx))\n", numa_node, (long)err, (unsigned long)err);
     }
   }
   return (*addr != NULL ? 0 : errno);
