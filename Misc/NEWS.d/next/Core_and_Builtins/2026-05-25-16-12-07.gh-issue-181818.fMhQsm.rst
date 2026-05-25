@@ -1,0 +1,4 @@
+Fix a static code scanning alert in the mimalloc integration
+(``Objects/mimalloc/arena.c``) by correcting the extraction of the arena ID
+from the ``mi_memid_t`` struct. This prevents undefined behavior when
+passing arguments to formatting functions expecting a scalar ``size_t``.
