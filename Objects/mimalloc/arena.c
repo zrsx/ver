@@ -617,18 +617,31 @@ void _mi_arena_free(void* p, size_t size, size_t committed_size, mi_memid_t memi
     size_t bitmap_idx;
     mi_arena_memid_indices(memid, &arena_idx, &bitmap_idx);
     mi_assert_internal(arena_idx < MI_MAX_ARENAS);
-    mi_arena_t* arena = mi_atomic_load_ptr_acquire(mi_arena_t,&mi_arenas[arena_idx]);
+    mi_arena_t* arena = mi_atomic_load_ptr_acquire(mi_arena_t, &mi_arenas[arena_idx]);
     mi_assert_internal(arena != NULL);
     const size_t blocks = mi_block_count_of_size(size);
+    const uintptr_t memid_id = (uintptr_t)memid.mem.arena.id;
 
     // checks
     if (arena == NULL) {
-      _mi_error_message(EINVAL, "trying to free from non-existent arena: %p, size %zu, memid: 0x%zx\n", p, size, memid);
+      /*
+       * mi_memid_t is a struct. Passing it by value to a format string expecting
+       * a scalar integer (%zx) causes undefined behavior in variadic functions.
+       * Since this code path operates exclusively on arena allocations, we safely
+       * extract the internal arena ID and cast it to size_t to match the format specifier.
+       */
+      _mi_error_message(EINVAL, "trying to free from non-existent arena: %p, size %zu, memid: 0x%zx\n", p, size, (size_t)memid_id);
       return;
     }
+
     mi_assert_internal(arena->field_count > mi_bitmap_index_field(bitmap_idx));
+
     if (arena->field_count <= mi_bitmap_index_field(bitmap_idx)) {
-      _mi_error_message(EINVAL, "trying to free from non-existent arena block: %p, size %zu, memid: 0x%zx\n", p, size, memid);
+      /*
+       * Apply the same extraction and cast for the arena block error message
+       * to safely satisfy the %zx format specifier.
+       */
+      _mi_error_message(EINVAL, "trying to free from non-existent arena block: %p, size %zu, memid: 0x%zx\n", p, size, (size_t)memid_id);
       return;
     }
 
