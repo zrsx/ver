@@ -21,7 +21,7 @@ jobs:
       CROSS_BUILD_PYTHON: cross-build/build
       CROSS_BUILD_WASI: cross-build/wasm32-wasip1
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       with:
         persist-credentials: false
     # No problem resolver registered as one doesn't currently exist for Clang.
@@ -31,7 +31,7 @@ jobs:
         version: ${{ env.WASMTIME_VERSION }}
     - name: "Restore WASI SDK"
       id: cache-wasi-sdk
-      uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ${{ env.WASI_SDK_PATH }}
         key: ${{ runner.os }}-wasi-sdk-${{ env.WASI_SDK_VERSION }}
